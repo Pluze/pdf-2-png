@@ -1,3 +1,4 @@
 Pipfile*
 build/
 *.spec
+/.idea
