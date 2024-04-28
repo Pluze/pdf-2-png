@@ -2,3 +2,4 @@ Pipfile*
 build/
 *.spec
 /.idea
+/imgs
