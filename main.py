@@ -27,10 +27,12 @@ def pdf2png(pdf_path: str, save_dir_name: str = 'imgs', zoom_x: int = 3, zoom_y:
         page_range_begin = 0
     if page_range_end == -1 or page_range_end > page_count:
         page_range_end = page_count
+    page_range_total_digits=len(str(page_range_end-page_range_begin))
     for page_number in tqdm(range(page_range_begin, page_range_end), desc='Pdf2png: '):
         page = doc.load_page(page_number)
         pix = page.get_pixmap(matrix=fitz.Matrix(zoom_x, zoom_y))
-        pix.save(f'{save_dir_name}/{page_number + 1}.png')
+        page_ind_name=str((page_number + 1)).zfill(page_range_total_digits)
+        pix.save(f'{save_dir_name}/{page_ind_name}.png')
     doc.close()
 
 
