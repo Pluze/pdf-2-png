@@ -6,7 +6,9 @@ import fitz
 from tqdm import tqdm
 from PIL import Image
 
-def pdf2png(pdf_path: str, save_dir_name: str = 'imgs', zoom_x: int = 3, zoom_y: int = 3):
+
+def pdf2png(pdf_path: str, save_dir_name: str = 'imgs', zoom_x: int = 3, zoom_y: int = 3, \
+            page_range_begin: int = 0, page_range_end: int = -1):
     """convert pdf to png
 
     Args:
@@ -14,13 +16,21 @@ def pdf2png(pdf_path: str, save_dir_name: str = 'imgs', zoom_x: int = 3, zoom_y:
         save_dir_name (str): Save path of pictures in png format. Default to `imgs`
         zoom_x (int): Set the resolution of pictures in png format. Default to 3
         zoom_y (int): Set the resolution of pictures in png format. Default to 3
+        page_range_begin (int): Set the first page to print. Default to 0
+        page_range_end (int): Set the  last page to print. Default to -1
     """
     shutil.rmtree(save_dir_name, ignore_errors=True)
     os.makedirs(save_dir_name, exist_ok=True)
     doc = fitz.open(pdf_path)
-    for page in tqdm(doc, desc='Pdf2png: '): 
+    page_count = doc.page_count
+    if page_range_begin < 0:
+        page_range_begin = 0
+    if page_range_end == -1 or page_range_end > page_count:
+        page_range_end = page_count
+    for page_number in tqdm(range(page_range_begin, page_range_end), desc='Pdf2png: '):
+        page = doc.load_page(page_number)
         pix = page.get_pixmap(matrix=fitz.Matrix(zoom_x, zoom_y))
-        pix.save(f'{save_dir_name}/{page.number+1}.png')
+        pix.save(f'{save_dir_name}/{page_number + 1}.png')
     doc.close()
 
 
@@ -51,17 +61,24 @@ def composite_long_graph(save_dir_name: str = 'imgs'):
     result.save('long.png')
 
 
-def main(save_dir_name: str = 'imgs', zoom_x: int = 3, zoom_y: int = 3):
+def main(save_dir_name: str = 'imgs', zoom_x: int = 3, zoom_y: int = 3, \
+         page_range_begin: int = 0, page_range_end: int = -1):
     """Main function
     """
     try:
         pdf_path = input('Please input the path of pdf document: ').replace('\\', '/')
         pdf_path = eval(pdf_path) if '"' in pdf_path else pdf_path
-        pdf2png(pdf_path, save_dir_name, zoom_x, zoom_y)
+        tmp_input_num = input('Please input the page range begin at: ')
+        if tmp_input_num.strip():
+            page_range_begin = int(tmp_input_num) - 1
+        tmp_input_num = input('Please input the page range begin at: ')
+        if tmp_input_num.strip():
+            page_range_end = int(tmp_input_num)
+        pdf2png(pdf_path, save_dir_name, zoom_x, zoom_y, page_range_begin, page_range_end)
         composite_long_graph(save_dir_name)
     except Exception as e:
         print(e)
-    os.system('pause')
+    #os.system('pause')
 
 
 if __name__ == "__main__":
